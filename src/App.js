@@ -4,8 +4,9 @@ import client from "./client";
 import { Query } from "react-apollo";
 import { SEARCH_REPOSITORIES } from "./graphql";
 
+const PER_PAGE = 5;
 const DEFAULT_STATE = {
-  first: 5,
+  first: PER_PAGE,
   after: null,
   last: null,
   before: null,
@@ -20,6 +21,16 @@ const App = () => {
     setState({
       ...DEFAULT_STATE,
       query: event.target.value,
+    });
+  };
+
+  const goNext = (search) => {
+    setState({
+      first: PER_PAGE,
+      after: search.pageInfo.endCursor,
+      last: null,
+      before: null,
+      query: query,
     });
   };
 
@@ -38,8 +49,6 @@ const App = () => {
           if (loading) return "Loading...";
           if (error) return `Error! ${error.message}`;
 
-          console.log(data);
-
           const search = data.search;
           const repositoryCount = search.repositoryCount;
           const repositoryUnit =
@@ -54,13 +63,20 @@ const App = () => {
                   const node = edge.node;
                   return (
                     <li key={node.id}>
-                      <a href={node.url} target="_blank" rel="noreferrer">
+                      <a
+                        href={node.url}
+                        target="_blank"
+                        rel="nopener noreferrer"
+                      >
                         {node.name}
                       </a>
                     </li>
                   );
                 })}
               </ul>
+              {search.pageInfo.hasNextPage === true ? (
+                <button onClick={() => goNext(search)}>Next</button>
+              ) : null}
             </>
           );
         }}
