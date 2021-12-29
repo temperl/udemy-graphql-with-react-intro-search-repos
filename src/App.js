@@ -1,18 +1,30 @@
 import React, { useState } from "react";
-import { ApolloProvider } from "react-apollo";
 import client from "./client";
-import { Query } from "react-apollo";
-import { SEARCH_REPOSITORIES } from "./graphql";
+import { ApolloProvider, Mutation, Query } from "react-apollo";
+import { ADD_STAR, SEARCH_REPOSITORIES } from "./graphql";
 
 const StarButton = (props) => {
   const node = props.node;
   const totalCount = node.stargazers.totalCount;
   const viewerHasStarred = node.viewerHasStarred;
   const startCount = totalCount === 1 ? "1 start" : `${totalCount} starts`;
+  const StarStatus = ({ addStar }) => {
+    return (
+      <button
+        onClick={() => {
+          addStar({
+            variables: { input: { starrableId: node.id } },
+          });
+        }}
+      >
+        {startCount} | {viewerHasStarred ? "starred" : "-"}
+      </button>
+    );
+  };
   return (
-    <button>
-      {startCount} | {viewerHasStarred ? "starred" : "-"}
-    </button>
+    <Mutation mutation={ADD_STAR}>
+      {(addStar) => <StarStatus addStar={addStar} />}
+    </Mutation>
   );
 };
 
@@ -70,7 +82,6 @@ const App = () => {
         {({ loading, error, data }) => {
           if (loading) return "Loading...";
           if (error) return `Error! ${error.message}`;
-
           const search = data.search;
           const repositoryCount = search.repositoryCount;
           const repositoryUnit =
