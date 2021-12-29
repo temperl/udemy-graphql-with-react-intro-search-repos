@@ -24,6 +24,16 @@ const App = () => {
     });
   };
 
+  const goPrevious = (search) => {
+    setState({
+      first: null,
+      after: null,
+      last: PER_PAGE,
+      before: search.pageInfo.startCursor,
+      query: query,
+    });
+  };
+
   const goNext = (search) => {
     setState({
       first: PER_PAGE,
@@ -74,6 +84,9 @@ const App = () => {
                   );
                 })}
               </ul>
+              {search.pageInfo.hasPreviousPage === true ? (
+                <button onClick={() => goPrevious(search)}>Previous</button>
+              ) : null}
               {search.pageInfo.hasNextPage === true ? (
                 <button onClick={() => goNext(search)}>Next</button>
               ) : null}
